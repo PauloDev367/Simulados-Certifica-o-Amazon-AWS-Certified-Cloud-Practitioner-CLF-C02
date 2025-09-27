@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Visualizador de Quiz AWS</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+      }
+      .home-link {
+        display: block;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .question-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #fafafa;
+      }
+      .question-text {
+        font-weight: bold;
+        font-size: 1.1em;
+      }
+      .answer-list {
+        list-style-type: none;
+        padding-left: 0;
+      }
+      .answer-item {
+        padding: 8px 12px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+        border: 1px solid #eee;
+      }
+      .correct-answer {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>{{ quiz.name }}</h1>
+      <a href="/" class="home-link">Voltar para a página inicial</a>
+      {% for question in questions %}
+      <div class="question-card">
+        <p class="question-text">
+          {{ question.question_number }}. {{ question.question_text }}
+        </p>
+        <ul class="answer-list">
+          {% for answer in question.answers %} {% if answer in
+          question.correct_answer %}
+          <li class="answer-item correct-answer">{{ answer }}</li>
+          {% else %}
+          <li class="answer-item">{{ answer }}</li>
+          {% endif %} {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>

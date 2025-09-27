@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Modo Quiz - Certificação AWS</title>
+    <style>
+      /* 1. Variáveis de Cores e Configurações Globais */
+      :root {
+        --aws-orange: #ff9900;
+        --aws-dark-blue: #232f3e;
+        --correct-green-bg: #e7f4e8;
+        --correct-green-border: #a3d6a5;
+        --correct-green-text: #2d6a2f;
+        --incorrect-red-bg: #fdeaea;
+        --incorrect-red-border: #f5b9bc;
+        --incorrect-red-text: #a94442;
+        --neutral-light-gray: #f8f9fa;
+        --neutral-mid-gray: #dee2e6;
+        --text-color: #343a40;
+      }
+
+      /* Reset básico e tipografia moderna */
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        margin: 0;
+        padding: 20px;
+      }
+
+      /* 2. Estilo do Card Principal do Quiz */
+      .quiz-container {
+        background: white;
+        width: 100%;
+        max-width: 800px;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      /* 3. Cabeçalho com Status (Pontuação e Contador) */
+      .stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.1em;
+        font-weight: 500;
+        color: #6c757d;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+      }
+
+      #question-text {
+        font-size: 1.5em;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--text-color);
+        line-height: 1.4;
+      }
+
+      #question-note {
+        font-size: 1em;
+        color: #6c757d;
+        margin-bottom: 30px;
+        font-style: italic;
+      }
+
+      /* 4. Estilo das Opções de Resposta (COM A MUDANÇA PRINCIPAL) */
+      .answer-options {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .answer-options li {
+        margin-bottom: 12px;
+      }
+
+      /* O <label> agora é um container flex para alinhar o input e o texto */
+      .answer-options label {
+        display: flex; /* MUDANÇA CHAVE */
+        align-items: center; /* MUDANÇA CHAVE */
+        background-color: var(--neutral-light-gray);
+        border: 1px solid var(--neutral-mid-gray);
+        border-radius: 8px;
+        padding: 15px;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease,
+          background-color 0.2s ease;
+      }
+
+      .answer-options label:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        background-color: #fff;
+      }
+
+      .answer-options input {
+        /* O input agora está DENTRO da label */
+        margin-right: 15px; /* Apenas para dar espaço entre o botão e o texto */
+        min-width: 1.2em;
+        min-height: 1.2em;
+      }
+
+      /* 5. Feedback Visual após a verificação */
+      .answer-options.disabled label {
+        cursor: not-allowed;
+      }
+      .answer-options.disabled label:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .answer-options li.correct-answer label {
+        background-color: var(--correct-green-bg) !important;
+        border-color: var(--correct-green-border) !important;
+        color: var(--correct-green-text);
+        font-weight: 500;
+      }
+
+      .answer-options li.wrong-answer label {
+        background-color: var(--incorrect-red-bg) !important;
+        border-color: var(--incorrect-red-border) !important;
+        color: var(--incorrect-red-text);
+      }
+
+      .answer-options li.correct-answer label::after {
+        content: "✔";
+        margin-left: auto;
+        font-weight: bold;
+        color: var(--correct-green-text);
+      }
+
+      .answer-options li.wrong-answer label::after {
+        content: "✖";
+        margin-left: auto;
+        font-weight: bold;
+        color: var(--incorrect-red-text);
+      }
+
+      /* 6. Estilo dos Botões e Mensagens de Feedback */
+      .feedback {
+        margin-top: 25px;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: bold;
+        text-align: center;
+        display: none;
+        font-size: 1.1em;
+      }
+      .correct {
+        background-color: var(--correct-green-bg);
+        color: var(--correct-green-text);
+      }
+      .incorrect {
+        background-color: var(--incorrect-red-bg);
+        color: var(--incorrect-red-text);
+      }
+      .button-container {<h1>Modo Visualização</h1>
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .quiz-btn {
+        flex-grow: 1;
+        padding: 15px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--aws-dark-blue);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+      }
+      .quiz-btn:hover {
+        background: var(--aws-orange);
+        transform: translateY(-2px);
+      }
+      .quiz-btn:disabled {
+        background-color: #adb5bd;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* 7. Melhorias para Telas Pequenas (Responsividade) */
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        .quiz-container {
+          padding: 20px;
+        }
+        #question-text {
+          font-size: 1.2em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="quiz-container">
+      <div class="stats">
+        <div id="question-counter"></div>
+        <div id="score-counter"></div>
+      </div>
+      <h2 id="question-text">Carregando pergunta...</h2>
+      <p id="question-note"></p>
+      <ul id="answer-options" class="answer-options"></ul>
+      <div id="feedback" class="feedback"></div>
+      <div class="button-container">
+        <button id="check-btn" class="quiz-btn">Verificar Resposta</button>
+        <button id="next-btn" class="quiz-btn" style="display: none">
+          Próxima Pergunta
+        </button>
+      </div>
+      <a
+        href="/quiz/{{ quiz.filename }}"
+        style="display: block; text-align: center; margin-top: 20px"
+      >
+        ← Voltar para a seleção de modo
+      </a>
+    </div>
+
+    <script>
+      const quizData = {{ questions|tojson }};
+
+      // ... (resto do código que não precisa mudar)
+      const questionCounterEl = document.getElementById('question-counter');
+      const scoreCounterEl = document.getElementById('score-counter');
+      const questionTextEl = document.getElementById('question-text');
+      const questionNoteEl = document.getElementById('question-note');
+      const answerOptionsEl = document.getElementById('answer-options');
+      const feedbackEl = document.getElementById('feedback');
+      const checkBtn = document.getElementById('check-btn');
+      const nextBtn = document.getElementById('next-btn');
+
+      let shuffledQuestions = [];
+      let currentQuestionIndex = 0;
+      let score = 0;
+
+      function startQuiz() {
+          shuffledQuestions = quizData.sort(() => Math.random() - 0.5);
+          currentQuestionIndex = 0;
+          score = 0;
+          showNextQuestion();
+      }
+
+      function showNextQuestion() {
+          resetState();
+          if (currentQuestionIndex >= shuffledQuestions.length) {
+              showFinalScore();
+              return;
+          }
+
+          const question = shuffledQuestions[currentQuestionIndex];
+          const isMultiAnswer = question.correct_answer.length > 1;
+
+          questionTextEl.innerText = question.question_text;
+          questionNoteEl.innerText = isMultiAnswer ? "Selecione todas as opções aplicáveis." : "Selecione uma opção.";
+
+          question.answers.forEach((answer, index) => {
+              const li = document.createElement('li');
+              const inputType = isMultiAnswer ? 'checkbox' : 'radio';
+              const inputId = `answer-${index}`;
+
+              // --- MUDANÇA PRINCIPAL NO JAVASCRIPT ---
+              // O input agora é criado DENTRO da tag <label>
+              li.innerHTML = `
+                  <label for="${inputId}">
+                      <input type="${inputType}" name="answer" id="${inputId}" value="${answer}">
+                      <span>${answer}</span>
+                  </label>
+              `;
+              answerOptionsEl.appendChild(li);
+          });
+          updateStats();
+      }
+
+      function checkAnswer() {
+          const selectedOptions = document.querySelectorAll('input[name="answer"]:checked');
+          if (selectedOptions.length === 0) {
+              alert('Por favor, selecione uma resposta.');
+              return;
+          }
+
+          const userAnswers = Array.from(selectedOptions).map(input => input.value);
+          const correctAnswers = shuffledQuestions[currentQuestionIndex].correct_answer;
+          const isCorrect = JSON.stringify(userAnswers.sort()) === JSON.stringify(correctAnswers.sort());
+
+          if (isCorrect) {
+              score++;
+              feedbackEl.innerText = 'Correto!';
+              feedbackEl.className = 'feedback correct';
+          } else {
+              feedbackEl.innerText = `Incorreto! Resposta(s) correta(s): ${correctAnswers.join(', ')}`;
+              feedbackEl.className = 'feedback incorrect';
+          }
+
+          feedbackEl.style.display = 'block';
+          highlightAnswers(userAnswers, correctAnswers);
+          checkBtn.style.display = 'none';
+          nextBtn.style.display = 'block';
+          updateStats();
+      }
+
+      function highlightAnswers(userAnswers, correctAnswers) {
+          answerOptionsEl.classList.add('disabled');
+          Array.from(answerOptionsEl.children).forEach(li => {
+              const input = li.querySelector('input');
+              const answer = input.value;
+
+              if (correctAnswers.includes(answer)) {
+                  li.classList.add('correct-answer');
+              }
+              else if (userAnswers.includes(answer) && !correctAnswers.includes(answer)) {
+                  li.classList.add('wrong-answer');
+              }
+
+              input.disabled = true;
+          });
+      }
+
+      function showFinalScore() {
+          questionTextEl.innerText = `Quiz Finalizado!`;
+          questionNoteEl.innerText = '';
+          answerOptionsEl.innerHTML = `<p style="text-align:center; font-size: 1.2em;">Você acertou ${score} de ${shuffledQuestions.length} perguntas.</p>`;
+          feedbackEl.style.display = 'none';
+          checkBtn.style.display = 'none';
+          nextBtn.innerText = 'Reiniciar Quiz';
+          nextBtn.style.display = 'block';
+      }
+
+      function resetState() {
+          answerOptionsEl.innerHTML = '';
+          answerOptionsEl.classList.remove('disabled');
+          feedbackEl.style.display = 'none';
+          checkBtn.style.display = 'block';
+          nextBtn.style.display = 'none';
+      }
+
+      function updateStats() {
+          questionCounterEl.innerText = `Pergunta: ${Math.min(currentQuestionIndex + 1, shuffledQuestions.length)} / ${shuffledQuestions.length}`;
+          scoreCounterEl.innerText = `Pontuação: ${score}`;
+      }
+
+      checkBtn.addEventListener('click', checkAnswer);
+      nextBtn.addEventListener('click', () => {
+          if (nextBtn.innerText === 'Reiniciar Quiz') {
+              startQuiz();
+          } else {
+              currentQuestionIndex++;
+              showNextQuestion();
+          }
+      });
+
+      startQuiz();
+    </script>
+  </body>
+</html>
