@@ -11,6 +11,10 @@ QUIZES = [
         "name": "Simulado 01 - Certificação Amazon AWS Certified Cloud Practitioner CLF-C02",
         "filename": "quiz_output.json"
     },
+    {
+        "name": "Simulado 02 - Certificação Amazon AWS Certified Cloud Practitioner CLF-C02",
+        "filename": "quiz2_output.json"
+    },
 ]
 
 def load_quiz_data(filename):
